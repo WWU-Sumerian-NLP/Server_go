@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
+
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -25,10 +27,53 @@ as input to our information extraction pipeline
 // func LoadRelationsCSV() {
 // }
 
-// func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
-// 	relationPatterns := LoadRelationsCSV()
-// 	json.NewEncoder(w).Encode(relationPatterns)
-// }
+func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(32 << 20)
+	var buf bytes.Buffer
+	file, header, err := r.FormFile("path_to_csv")
+	if err != nil {
+		println("ERROR")
+		panic(err)
+	}
+
+	defer file.Close()
+	name := strings.Split(header.Filename, ".")
+	fmt.Printf("name: %v\n", name)
+
+	io.Copy(&buf, file)
+	contents := buf.String()
+	fmt.Printf("contents: %v\n", contents)
+	buf.Reset()
+
+	json.NewEncoder(w).Encode(contents)
+	println("get relations")
+
+	reader := csv.NewReader(r.Body)
+	data, err := reader.ReadAll()
+	if err != nil {
+		fmt.Printf("data: %v\n", data)
+	}
+	path := "../CDLI_Extractor/output/urr3_annotations.tsv"
+	destPath := "output/urr3_ie_annotations.tsv"
+
+	cdliParser := IE_Extractor.NewCDLIParser(path)
+	RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
+
+	for _, row := range data {
+		fmt.Printf("row: %v\n", row)
+		relationData := IE_Extractor.NewRelationData(row[0], row[1], row[2], row[3])
+		RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
+	}
+	dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
+
+	go func() {
+		println("running pipeline")
+		dataWriter.WaitUntilDone()
+		RelationExtractorRB.WaitUntilDone()
+		cdliParser.WaitUntilDone()
+	}()
+
+}
 
 // func GetRelationData(w http.ResponseWriter, r *http.Request) {
 // 	relationData := LoadRelationsCSV()
@@ -46,6 +91,7 @@ func GetEntityData(w http.ResponseWriter, r *http.Request) {
 		println("ERROR")
 		panic(err)
 	}
+
 	defer file.Close()
 	name := strings.Split(header.Filename, ".")
 	fmt.Printf("name: %v\n", name[0])
@@ -63,31 +109,14 @@ func GetEntityData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("data: %v\n", data)
 	}
-	// fmt.Printf("reader: %v\n", reader)
-	var results [][]string
-	for {
 
-		//read one row from csv
-		record, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return
-		}
-		//add record to result set
-		results = append(results, record)
-		// fmt.Printf("reader: %v\n", reader)
-	}
-	fmt.Printf("results: %v\n", results)
-	// test := json.NewEncoder(w).Encode(results)
-	// fmt.Printf("test: %v\n", test)
 }
 
 func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/entity", GetEntityData).Methods("POST")
+	router.HandleFunc("/relations", GetRelationPatterns).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
