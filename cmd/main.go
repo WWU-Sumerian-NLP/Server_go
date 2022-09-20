@@ -9,11 +9,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
-
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
 )
 
 /*
