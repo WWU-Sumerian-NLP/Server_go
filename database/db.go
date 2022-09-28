@@ -20,9 +20,12 @@ func NewInternalDB() (*InternalDB, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	return &InternalDB{
 		db: db,
 	}, nil
+}
+
+func (i *InternalDB) CloseDB() {
+	i.db.Close()
 }
