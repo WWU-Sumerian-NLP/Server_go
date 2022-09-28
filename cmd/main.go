@@ -7,12 +7,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
+	"github.com/urr3-drehem-KG/gRPC_Server_go/database"
+	// "github.com/urr3-drehem-KG/gRPC_Server_go/database/"
 )
 
 /*
@@ -35,42 +38,58 @@ func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	// db := NewInternalDB()
+	//copy example
+	f, err := os.OpenFile("./relation_input.tsv", os.O_WRONLY|os.O_CREATE, 0666)
+	defer f.Close()
+	io.Copy(f, file)
+	fmt.Printf("f: %v\n", f)
+
 	defer file.Close()
 	name := strings.Split(header.Filename, ".")
 	fmt.Printf("name: %v\n", name)
 
 	io.Copy(&buf, file)
 	contents := buf.String()
-	fmt.Printf("contents: %v\n", contents)
+	// fmt.Printf("contents: %v\n", contents)
 	buf.Reset()
 
-	json.NewEncoder(w).Encode(contents)
 	println("get relations")
 
-	reader := csv.NewReader(r.Body)
+	createdFile, err := os.Open("relation_input.tsv")
+
+	reader := csv.NewReader(createdFile)
+	reader.Comma = '\t'
+
 	data, err := reader.ReadAll()
 	if err != nil {
 		fmt.Printf("data: %v\n", data)
 	}
-	path := "../CDLI_Extractor/output/urr3_annotations.tsv"
-	destPath := "output/urr3_ie_annotations.tsv"
+	fmt.Printf("data: %v\n", data)
+	path := "urr3_annotations.tsv"
+	destPath := "urr3_ie_annotations.tsv"
+
+	db, err := database.NewInternalDB()
+	fmt.Printf("db: %v\n", db)
+	// db.InsertRelation()
 
 	cdliParser := IE_Extractor.NewCDLIParser(path)
 	RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
+	for i, row := range data {
+		if i != 0 {
 
-	for _, row := range data {
-		fmt.Printf("row: %v\n", row)
-		relationData := IE_Extractor.NewRelationData(row[0], row[1], row[2], row[3])
-		RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
+			relationData := IE_Extractor.NewRelationData(row[0], row[1], row[2], row[3], row[4])
+			fmt.Printf("relationData: %v\n", relationData)
+
+			RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
+
+			fmt.Printf("row: %v\n", row)
+		}
 	}
-	dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
 
-	go func() {
-		println("running pipeline")
-		dataWriter.WaitUntilDone()
-		RelationExtractorRB.WaitUntilDone()
-		cdliParser.WaitUntilDone()
-	}()
+	dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
+	dataWriter.WaitUntilDone()
+	json.NewEncoder(w).Encode(contents)
 
 }
 
@@ -113,7 +132,6 @@ func GetEntityData(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	router := mux.NewRouter()
-
 	router.HandleFunc("/entity", GetEntityData).Methods("POST")
 	router.HandleFunc("/relations", GetRelationPatterns).Methods("POST")
 
@@ -123,6 +141,5 @@ func main() {
 	})
 
 	handler := c.Handler(router)
-
 	log.Fatal(http.ListenAndServe(":8000", handler))
 }
