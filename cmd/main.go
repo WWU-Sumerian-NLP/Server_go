@@ -13,7 +13,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
 	"github.com/urr3-drehem-KG/gRPC_Server_go/database"
 	// "github.com/urr3-drehem-KG/gRPC_Server_go/database/"
 )
@@ -62,33 +61,45 @@ func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
 	reader.Comma = '\t'
 
 	data, err := reader.ReadAll()
-	if err != nil {
-		fmt.Printf("data: %v\n", data)
-	}
+
 	fmt.Printf("data: %v\n", data)
-	path := "urr3_annotations.tsv"
-	destPath := "urr3_ie_annotations.tsv"
+	// path := "urr3_annotations.tsv"
+	// destPath := "urr3_ie_annotations.tsv"
 
 	db, err := database.NewInternalDB()
 	fmt.Printf("db: %v\n", db)
 	// db.InsertRelation()
 
-	cdliParser := IE_Extractor.NewCDLIParser(path)
-	RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
+	// //Run Pipeline
+	// cdliParser := IE_Extractor.NewCDLIParser(path)
+	// RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
 	for i, row := range data {
 		if i != 0 {
+			createdRelations := &database.Relations{
+				RelationType: row[0],
+				SubjectTag:   row[1],
+				ObjectTag:    row[2],
+				RegexRules:   row[3],
+				Tags:         row[4],
+			}
 
-			relationData := IE_Extractor.NewRelationData(row[0], row[1], row[2], row[3], row[4])
-			fmt.Printf("relationData: %v\n", relationData)
+			// 		relationData := IE_Extractor.NewRelationData(row[0], row[1], row[2], row[3], row[4])
+			// 		fmt.Printf("relationData: %v\n", relationData)
 
-			RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
+			// 		RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
 
-			fmt.Printf("row: %v\n", row)
+			// 		fmt.Printf("row: %v\n", row)
+			result, err := db.InsertRelation(*createdRelations)
+			fmt.Printf("err: %v\n", err)
+			if err != nil {
+				fmt.Printf("result: %v\n", result)
+			}
 		}
 	}
+	fmt.Println(db.ListRelations(0))
 
-	dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
-	dataWriter.WaitUntilDone()
+	// dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
+	// dataWriter.WaitUntilDone()
 	json.NewEncoder(w).Encode(contents)
 
 }
