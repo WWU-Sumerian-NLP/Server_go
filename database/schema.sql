@@ -5,7 +5,7 @@ CREATE TABLE [entities](
 );
 
 CREATE TABLE [relations](
-    id INTEGER,
+    -- id INTEGER,
     relation_type TEXT,
     subject_tag TEXT,
     object_tag TEXT,
