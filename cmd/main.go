@@ -13,6 +13,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/urr3-drehem-KG/Data_Pipeline_go/CDLI_Extractor"
 	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
 	"github.com/urr3-drehem-KG/gRPC_Server_go/database"
 )
@@ -43,7 +44,6 @@ func InsertRelationPatterns(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(&buf, file)
 	contents := buf.String()
-	// fmt.Printf("contents: %v\n", contents)
 	buf.Reset()
 
 	createdFile, err := os.Open("relation_input.tsv")
@@ -65,18 +65,16 @@ func InsertRelationPatterns(w http.ResponseWriter, r *http.Request) {
 		log.Fatal()
 	}
 	fmt.Printf("db: %v\n", db)
-	// db.InsertRelation()
 
 	for i, row := range data {
 		fmt.Printf("row: %v\n", row)
 		if i != 0 {
 			createdRelations := &database.Relations{
-				ID:           row[0],
-				RelationType: row[1],
-				SubjectTag:   row[2],
-				ObjectTag:    row[3],
-				RegexRules:   row[4],
-				Tags:         row[5],
+				RelationType: row[0],
+				SubjectTag:   row[1],
+				ObjectTag:    row[2],
+				RegexRules:   row[3],
+				Tags:         row[4],
 			}
 			fmt.Printf("createdRelations: %v\n", createdRelations)
 
@@ -130,50 +128,185 @@ func RunRelationExtraction(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(relations)
 }
 
-// func GetRelationData(w http.ResponseWriter, r *http.Request) {
-// 	relationData := LoadRelationsCSV()
-// 	json.NewEncoder(w).Encode(relationData)
-// }
-
 // Entity Data
 // Name, Tag
 // Link: https://stackoverflow.com/questions/40684307/how-can-i-receive-an-uploaded-file-using-a-golang-net-http-server
-func GetEntityData(w http.ResponseWriter, r *http.Request) {
+func InsertEntities(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	var buf bytes.Buffer
-	file, header, err := r.FormFile("path_to_csv")
+	file, header, err := r.FormFile("path_to_entity_csv")
 	if err != nil {
 		println("ERROR")
 		panic(err)
 	}
 
+	f, err := os.OpenFile("./entity_input.tsv", os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatal()
+	}
+	contents := buf.String()
+
+	defer file.Close()
+	io.Copy(f, file)
 	defer file.Close()
 	name := strings.Split(header.Filename, ".")
-	fmt.Printf("name: %v\n", name[0])
+	fmt.Printf("name: %v\n", name)
+
 	io.Copy(&buf, file)
-	contents := buf.String()
-	fmt.Printf("contents: %v\n", contents)
 	buf.Reset()
-	json.NewEncoder(w).Encode(contents)
-	// fmt.Printf("r: %v\n", r)
-	println("get entity")
-	// fmt.Printf("r.Body: %v\n", r.Body)
-	// parse POST body as csv
-	reader := csv.NewReader(r.Body)
+
+	createdFile, err := os.Open("entity_input.tsv")
+	if err != nil {
+		log.Fatal()
+	}
+
+	reader := csv.NewReader(createdFile)
+	reader.Comma = '\t'
 	data, err := reader.ReadAll()
 	if err != nil {
 		fmt.Printf("data: %v\n", data)
 	}
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
 
+	for i, row := range data {
+		if i != 0 {
+			createdEntity := &database.Entities{
+				EntityName: row[0],
+				EntityType: row[1],
+			}
+			fmt.Printf("createdEntity: %v\n", createdEntity)
+			db.InsertEntity(*createdEntity)
+		}
+	}
+	json.NewEncoder(w).Encode(contents)
+}
+
+func GetEntityData(w http.ResponseWriter, r *http.Request) {
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
+	entities, err := db.GetAllEntities(0)
+	fmt.Printf("entities: %v\n", entities)
+	fmt.Printf("err: %v\n", err)
+	if err != nil {
+		log.Fatal()
+	}
+	json.NewEncoder(w).Encode(entities)
+}
+
+func RunEntityExtraction(w http.ResponseWriter, r *http.Request) {
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
+	entities, err := db.GetAllEntities(0)
+	if err != nil {
+		log.Fatal()
+	}
+	// //Run Pipeline
+	path := "sumerian_tablets/cdli_result_20220525.txt"
+	destPath := "urr3_annotations.tsv"
+	atfParser := CDLI_Extractor.NewATFParser(path)
+	translitCleaner := CDLI_Extractor.NewTransliterationCleaner(false, atfParser.Out)
+	entityExtractor := CDLI_Extractor.NewCDLIEntityExtractor(translitCleaner.Out)
+
+	for _, entity := range entities {
+		entityExtractor.TempNERMap[entity.EntityName] = entity.EntityType
+
+	}
+	dataWriter := CDLI_Extractor.NewDataWriter(destPath, entityExtractor.Out)
+	dataWriter.WaitUntilDone()
+	json.NewEncoder(w).Encode(entities)
+}
+
+///////////////////////////////////////////////////////////////////////////
+func InsertRelationships(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(32 << 20)
+	var buf bytes.Buffer
+	file, header, err := r.FormFile("path_to_relationship_csv")
+	if err != nil {
+		println("ERROR")
+		panic(err)
+	}
+
+	f, err := os.OpenFile("./relationship_input.tsv", os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatal()
+	}
+	contents := buf.String()
+
+	defer file.Close()
+	io.Copy(f, file)
+	defer file.Close()
+	name := strings.Split(header.Filename, ".")
+	fmt.Printf("name: %v\n", name)
+
+	io.Copy(&buf, file)
+	buf.Reset()
+
+	createdFile, err := os.Open("relationship_input.tsv")
+	if err != nil {
+		log.Fatal()
+	}
+
+	reader := csv.NewReader(createdFile)
+	reader.Comma = '\t'
+	data, err := reader.ReadAll()
+	if err != nil {
+		fmt.Printf("data: %v\n", data)
+	}
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
+	for i, row := range data {
+		if i != 0 {
+			createdRelationship := &database.Relationships{
+				TabletNum:       row[0],
+				RelationType:    row[1],
+				Subject:         row[2],
+				Object:          row[3],
+				Providence:      row[4],
+				TimePeriod:      row[5],
+				DatesReferenced: row[6],
+			}
+			fmt.Printf("createdRelationship: %v\n", createdRelationship)
+			db.InsertRelationships(*createdRelationship)
+		}
+	}
+	json.NewEncoder(w).Encode(contents)
+}
+
+func GetRelationships(w http.ResponseWriter, r *http.Request) {
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
+	relationships, err := db.GetAllRelationships(0)
+	fmt.Printf("relationships: %v\n", relationships)
+	fmt.Printf("err: %v\n", err)
+	if err != nil {
+		log.Fatal()
+	}
+	json.NewEncoder(w).Encode(relationships)
 }
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/entity", GetEntityData).Methods("POST")
+	router.HandleFunc("/insertEntities", InsertEntities).Methods("POST")
+	router.HandleFunc("/getEntities", GetEntityData).Methods("POST")
+	router.HandleFunc("/runEntityExtraction", RunEntityExtraction).Methods("POST")
 
 	router.HandleFunc("/insertRelations", InsertRelationPatterns).Methods("POST")
 	router.HandleFunc("/getRelations", GetRelationPatterns).Methods("POST")
 	router.HandleFunc("/runRelationExtraction", RunRelationExtraction).Methods("POST")
+
+	router.HandleFunc("/insertRelationship", InsertRelationships).Methods("POST")
+	router.HandleFunc("/getRelationships", GetRelationships).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
