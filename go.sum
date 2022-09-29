@@ -16,6 +16,8 @@ github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSS
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
+github.com/urr3-drehem-KG/Data_Pipeline_go/CDLI_Extractor v0.0.0-20220929054029-72de4c4fd730 h1:MCN6VWEdgURmcxnYBdbqRj8a1NFuQabXZ05MYvN0lSU=
+github.com/urr3-drehem-KG/Data_Pipeline_go/CDLI_Extractor v0.0.0-20220929054029-72de4c4fd730/go.mod h1:miL7a/gBWW1VCprzxVy6251w3c8KE3y9KhWazH1dR/o=
 github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor v0.0.0-20220921003953-4c809f1ed4f7 h1:GLQXhXXunEJI8ZhsZYIhtbTbK0LxOrj/XkDMqM+KBOA=
 github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor v0.0.0-20220921003953-4c809f1ed4f7/go.mod h1:7Nl/rkH++imm45Gm1j0e3xl0bJlk0Y40WuUrIwEaXaQ=
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220928045420-5095f0592f03 h1:F3lC3u5GgX+jHya/Sn18bv+XdaTdxysgKBf2NMEg5Jk=
@@ -38,6 +40,8 @@ github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929032714-628b6730
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929032714-628b67308cb9/go.mod h1:gSGcgtwE1MuPprfGyDuk6Ku2epiR/NqnrZifUoi5Tzk=
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929041946-fc422c8fafd3 h1:GMGvLSz34AsyTUko4g86gDOZ1XbBevG15rs1bO3CuA0=
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929041946-fc422c8fafd3/go.mod h1:gSGcgtwE1MuPprfGyDuk6Ku2epiR/NqnrZifUoi5Tzk=
+github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929054246-21f3d6ba025e h1:1zQmSKJXVgZVOUEiw3EbguS2odXEKEAexlEoWOvaTzU=
+github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929054246-21f3d6ba025e/go.mod h1:gSGcgtwE1MuPprfGyDuk6Ku2epiR/NqnrZifUoi5Tzk=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

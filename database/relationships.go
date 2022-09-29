@@ -78,3 +78,22 @@ func (i *InternalDB) ListRelationships(offset int) ([]Relationships, error) {
 	}
 	return data, nil
 }
+
+func (i *InternalDB) GetAllRelationships(offset int) ([]Relationships, error) {
+	rows, err := i.db.Query("SELECT * FROM relationships")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	data := []Relationships{}
+	for rows.Next() {
+		i := Relationships{}
+		err = rows.Scan(&i.ID, &i.TabletNum, &i.RelationType, &i.Subject, &i.Object, &i.Providence, &i.TimePeriod, &i.DatesReferenced)
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, i)
+	}
+	return data, nil
+}

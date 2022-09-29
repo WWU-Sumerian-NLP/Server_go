@@ -71,3 +71,22 @@ func (i *InternalDB) ListEntities(offset int) ([]Entities, error) {
 	}
 	return data, nil
 }
+
+func (i *InternalDB) GetAllEntities(offset int) ([]Entities, error) {
+	rows, err := i.db.Query("SELECT * FROM entities")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	data := []Entities{}
+	for rows.Next() {
+		i := Entities{}
+		err = rows.Scan(&i.ID, &i.EntityName, &i.EntityType)
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, i)
+	}
+	return data, nil
+}
