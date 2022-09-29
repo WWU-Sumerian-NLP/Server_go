@@ -60,6 +60,7 @@ func InsertRelationPatterns(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db, err := database.NewInternalDB()
+	fmt.Printf("err: %v\n", err)
 	if err != nil {
 		log.Fatal()
 	}
@@ -67,13 +68,15 @@ func InsertRelationPatterns(w http.ResponseWriter, r *http.Request) {
 	// db.InsertRelation()
 
 	for i, row := range data {
+		fmt.Printf("row: %v\n", row)
 		if i != 0 {
 			createdRelations := &database.Relations{
-				RelationType: row[0],
-				SubjectTag:   row[1],
-				ObjectTag:    row[2],
-				RegexRules:   row[3],
-				Tags:         row[4],
+				ID:           row[0],
+				RelationType: row[1],
+				SubjectTag:   row[2],
+				ObjectTag:    row[3],
+				RegexRules:   row[4],
+				Tags:         row[5],
 			}
 			fmt.Printf("createdRelations: %v\n", createdRelations)
 
@@ -107,7 +110,7 @@ func RunRelationExtraction(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal()
 	}
-	relations, err := db.ListRelations(2)
+	relations, err := db.GetAllRelations(0)
 	if err != nil {
 		log.Fatal()
 	}

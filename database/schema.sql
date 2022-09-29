@@ -5,12 +5,13 @@ CREATE TABLE [entities](
 );
 
 CREATE TABLE [relations](
-    -- id INTEGER,
+    id INTEGER NOT NULL PRIMARY KEY,
     relation_type TEXT,
     subject_tag TEXT,
     object_tag TEXT,
     regex_rules TEXT,
-    tags TEXT
+    tags TEXT,
+    unique (relation_type, subject_tag, object_tag, regex_rules, tags)
 );
 
 CREATE TABLE [relationships](

@@ -9,7 +9,7 @@ import (
 //Using examples from: https://earthly.dev/blog/golang-sqlite/
 
 type Relations struct {
-	// ID           uint   `json:"id"`
+	ID           string `json:"id"`
 	RelationType string `json:"relationType"`
 	SubjectTag   string `json:"subjectTag"`
 	ObjectTag    string `json:"objectTag"`
@@ -18,7 +18,7 @@ type Relations struct {
 }
 
 func (i *InternalDB) InsertRelation(relations Relations) (int, error) {
-	res, err := i.db.Exec("INSERT INTO relations VALUES(?, ?, ?, ?, ?);", relations.RelationType, relations.SubjectTag,
+	res, err := i.db.Exec("INSERT INTO relations VALUES(NULL, ?, ?, ?, ?, ?);", relations.RelationType, relations.SubjectTag,
 		relations.ObjectTag, relations.RegexRules, relations.Tags)
 	if err != nil {
 		return 0, err
@@ -69,7 +69,7 @@ func (i *InternalDB) ListRelations(offset int) ([]Relations, error) {
 	data := []Relations{}
 	for rows.Next() {
 		i := Relations{}
-		err = rows.Scan(&i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
+		err = rows.Scan(&i.ID, &i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func (i *InternalDB) GetAllRelations(offset int) ([]Relations, error) {
 	for rows.Next() {
 		i := Relations{}
 		fmt.Printf("i: %v\n", i)
-		err = rows.Scan(&i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
+		err = rows.Scan(&i.ID, &i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
 		if err != nil {
 			return nil, err
 		}
