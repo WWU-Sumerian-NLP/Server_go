@@ -90,8 +90,9 @@ func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal()
 	}
-	relations, err := db.GetAllRelations()
+	relations, err := db.GetAllRelations(0)
 	fmt.Printf("relations: %v\n", relations)
+	fmt.Printf("err: %v\n", err)
 	if err != nil {
 		log.Fatal()
 	}
@@ -168,7 +169,7 @@ func main() {
 	router.HandleFunc("/entity", GetEntityData).Methods("POST")
 
 	router.HandleFunc("/insertRelations", InsertRelationPatterns).Methods("POST")
-	router.HandleFunc("/getRelations", GetRelationPatterns).Methods("GET")
+	router.HandleFunc("/getRelations", GetRelationPatterns).Methods("POST")
 	router.HandleFunc("/runRelationExtraction", RunRelationExtraction).Methods("POST")
 
 	c := cors.New(cors.Options{

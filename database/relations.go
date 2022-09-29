@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 )
 
@@ -87,6 +88,7 @@ func (i *InternalDB) GetAllRelations(offset int) ([]Relations, error) {
 	data := []Relations{}
 	for rows.Next() {
 		i := Relations{}
+		fmt.Printf("i: %v\n", i)
 		err = rows.Scan(&i.ID, &i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
 		if err != nil {
 			return nil, err
