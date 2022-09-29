@@ -13,22 +13,12 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor"
 	"github.com/urr3-drehem-KG/gRPC_Server_go/database"
-	// "github.com/urr3-drehem-KG/gRPC_Server_go/database/"
 )
 
-/*
-
-This server will be basic as it needs to just get CSV files and then parse them
-as input to our information extraction pipeline
-
-
-*/
-
-// func LoadRelationsCSV() {
-// }
-
-func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
+// Insert Relation Patterns to the database from the react app csv/tsv file
+func InsertRelationPatterns(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	var buf bytes.Buffer
 	file, header, err := r.FormFile("path_to_csv")
@@ -37,9 +27,12 @@ func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	// db := NewInternalDB()
 	//copy example
 	f, err := os.OpenFile("./relation_input.tsv", os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatal()
+	}
+
 	defer f.Close()
 	io.Copy(f, file)
 	fmt.Printf("f: %v\n", f)
@@ -53,26 +46,26 @@ func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
 	// fmt.Printf("contents: %v\n", contents)
 	buf.Reset()
 
-	println("get relations")
-
 	createdFile, err := os.Open("relation_input.tsv")
+	if err != nil {
+		log.Fatal()
+	}
 
 	reader := csv.NewReader(createdFile)
 	reader.Comma = '\t'
 
 	data, err := reader.ReadAll()
-
-	fmt.Printf("data: %v\n", data)
-	// path := "urr3_annotations.tsv"
-	// destPath := "urr3_ie_annotations.tsv"
+	if err != nil {
+		log.Fatal()
+	}
 
 	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
 	fmt.Printf("db: %v\n", db)
 	// db.InsertRelation()
 
-	// //Run Pipeline
-	// cdliParser := IE_Extractor.NewCDLIParser(path)
-	// RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
 	for i, row := range data {
 		if i != 0 {
 			createdRelations := &database.Relations{
@@ -82,26 +75,55 @@ func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
 				RegexRules:   row[3],
 				Tags:         row[4],
 			}
+			fmt.Printf("createdRelations: %v\n", createdRelations)
 
-			// 		relationData := IE_Extractor.NewRelationData(row[0], row[1], row[2], row[3], row[4])
-			// 		fmt.Printf("relationData: %v\n", relationData)
+			db.InsertRelation(*createdRelations)
 
-			// 		RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
-
-			// 		fmt.Printf("row: %v\n", row)
-			result, err := db.InsertRelation(*createdRelations)
-			fmt.Printf("err: %v\n", err)
-			if err != nil {
-				fmt.Printf("result: %v\n", result)
-			}
 		}
 	}
-	fmt.Println(db.ListRelations(0))
-
-	// dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
-	// dataWriter.WaitUntilDone()
 	json.NewEncoder(w).Encode(contents)
+}
 
+// Get All Relation Pattern from the database to the react app
+func GetRelationPatterns(w http.ResponseWriter, r *http.Request) {
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
+	relations, err := db.GetAllRelations()
+	fmt.Printf("relations: %v\n", relations)
+	if err != nil {
+		log.Fatal()
+	}
+	test := json.NewEncoder(w).Encode(relations)
+	fmt.Printf("test: %v\n", test)
+
+}
+
+// Get All Relation Data from the database and run the relation extraction pipeline
+func RunRelationExtraction(w http.ResponseWriter, r *http.Request) {
+	db, err := database.NewInternalDB()
+	if err != nil {
+		log.Fatal()
+	}
+	relations, err := db.ListRelations(2)
+	if err != nil {
+		log.Fatal()
+	}
+	// //Run Pipeline
+	path := "urr3_annotations.tsv"
+	destPath := "urr3_ie_annotations.tsv"
+	cdliParser := IE_Extractor.NewCDLIParser(path)
+	RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
+	for _, relation := range relations {
+
+		relationData := IE_Extractor.NewRelationData(relation.RelationType, relation.SubjectTag, relation.ObjectTag, relation.RegexRules, relation.Tags)
+		RelationExtractorRB.RelationDataList = append(RelationExtractorRB.RelationDataList, *relationData)
+
+	}
+	dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
+	dataWriter.WaitUntilDone()
+	json.NewEncoder(w).Encode(relations)
 }
 
 // func GetRelationData(w http.ResponseWriter, r *http.Request) {
@@ -144,7 +166,10 @@ func GetEntityData(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/entity", GetEntityData).Methods("POST")
-	router.HandleFunc("/relations", GetRelationPatterns).Methods("POST")
+
+	router.HandleFunc("/insertRelations", InsertRelationPatterns).Methods("POST")
+	router.HandleFunc("/getRelations", GetRelationPatterns).Methods("GET")
+	router.HandleFunc("/runRelationExtraction", RunRelationExtraction).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
