@@ -9,7 +9,7 @@ import (
 //Using examples from: https://earthly.dev/blog/golang-sqlite/
 
 type Relations struct {
-	ID           uint   `json:"id"`
+	// ID           uint   `json:"id"`
 	RelationType string `json:"relationType"`
 	SubjectTag   string `json:"subjectTag"`
 	ObjectTag    string `json:"objectTag"`
@@ -32,15 +32,15 @@ func (i *InternalDB) InsertRelation(relations Relations) (int, error) {
 }
 
 func (i *InternalDB) RetrieveRelation(id int) (Relations, error) {
-	log.Printf("Getting %d", id)
+	// log.Printf("Getting %d", id)
 
 	//Query DB row based on ID
-	row := i.db.QueryRow("SELECT id, relation_type, subject_tag, object_type, regex_rules, tags FROM relations WHERE id=?", id)
+	row := i.db.QueryRow("SELECT relation_type, subject_tag, object_type, regex_rules, tags FROM relations WHERE id=?", id)
 
 	//parse row into entites struct
 	relations := Relations{}
 	var err error
-	if err = row.Scan(&relations.ID, &relations.RelationType, &relations.SubjectTag, &relations.ObjectTag,
+	if err = row.Scan(&relations.RelationType, &relations.SubjectTag, &relations.ObjectTag,
 		&relations.RegexRules, &relations.Tags); err == sql.ErrNoRows {
 		log.Printf("Id not found")
 		return Relations{}, err
@@ -69,7 +69,7 @@ func (i *InternalDB) ListRelations(offset int) ([]Relations, error) {
 	data := []Relations{}
 	for rows.Next() {
 		i := Relations{}
-		err = rows.Scan(&i.ID, &i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
+		err = rows.Scan(&i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +79,7 @@ func (i *InternalDB) ListRelations(offset int) ([]Relations, error) {
 }
 
 func (i *InternalDB) GetAllRelations(offset int) ([]Relations, error) {
-	rows, err := i.db.Query("SELECT * FROM relations")
+	rows, err := i.db.Query("SELECT * FROM relations;")
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (i *InternalDB) GetAllRelations(offset int) ([]Relations, error) {
 	for rows.Next() {
 		i := Relations{}
 		fmt.Printf("i: %v\n", i)
-		err = rows.Scan(&i.ID, &i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
+		err = rows.Scan(&i.RelationType, &i.SubjectTag, &i.ObjectTag, &i.RegexRules, &i.Tags)
 		if err != nil {
 			return nil, err
 		}
