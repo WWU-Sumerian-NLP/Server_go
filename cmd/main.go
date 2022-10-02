@@ -175,7 +175,7 @@ func InsertEntities(w http.ResponseWriter, r *http.Request) {
 		if i != 0 {
 			createdEntity := &database.Entities{
 				EntityName: row[0],
-				EntityType: row[1],
+				EntityTag:  row[1],
 			}
 			fmt.Printf("createdEntity: %v\n", createdEntity)
 			db.InsertEntity(*createdEntity)
@@ -215,7 +215,7 @@ func RunEntityExtraction(w http.ResponseWriter, r *http.Request) {
 	entityExtractor := CDLI_Extractor.NewCDLIEntityExtractor(translitCleaner.Out)
 
 	for _, entity := range entities {
-		entityExtractor.TempNERMap[entity.EntityName] = entity.EntityType
+		entityExtractor.TempNERMap[entity.EntityName] = entity.EntityTag
 
 	}
 	dataWriter := CDLI_Extractor.NewDataWriter(destPath, entityExtractor.Out)

@@ -10,11 +10,11 @@ import (
 type Entities struct {
 	ID         uint   `json:"id"`
 	EntityName string `json:"entityName"`
-	EntityType string `json:"entityType"`
+	EntityTag  string `json:"entityTag"`
 }
 
 func (i *InternalDB) InsertEntity(entities Entities) (int, error) {
-	res, err := i.db.Exec("INSERT INTO entities VALUES(NULL, ?, ?);", entities.EntityName, entities.EntityType)
+	res, err := i.db.Exec("INSERT INTO entities VALUES(NULL, ?, ?);", entities.EntityName, entities.EntityTag)
 	if err != nil {
 		return 0, err
 	}
@@ -35,7 +35,7 @@ func (i *InternalDB) RetrieveEntity(id int) (Entities, error) {
 	//parse row into entites struct
 	entities := Entities{}
 	var err error
-	if err = row.Scan(&entities.ID, &entities.EntityName, &entities.EntityType); err == sql.ErrNoRows {
+	if err = row.Scan(&entities.ID, &entities.EntityName, &entities.EntityTag); err == sql.ErrNoRows {
 		log.Printf("Id not found")
 		return Entities{}, err
 	}
@@ -63,7 +63,7 @@ func (i *InternalDB) ListEntities(offset int) ([]Entities, error) {
 	data := []Entities{}
 	for rows.Next() {
 		i := Entities{}
-		err = rows.Scan(&i.ID, &i.EntityName, &i.EntityType)
+		err = rows.Scan(&i.ID, &i.EntityName, &i.EntityTag)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func (i *InternalDB) GetAllEntities(offset int) ([]Entities, error) {
 	data := []Entities{}
 	for rows.Next() {
 		i := Entities{}
-		err = rows.Scan(&i.ID, &i.EntityName, &i.EntityType)
+		err = rows.Scan(&i.ID, &i.EntityName, &i.EntityTag)
 		if err != nil {
 			return nil, err
 		}
