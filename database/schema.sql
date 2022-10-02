@@ -1,7 +1,8 @@
 CREATE TABLE [entities](
-    id INTEGER,
+    id INTEGER NOT NULL PRIMARY KEY,
     entity_name TEXT,
-    entity_type TEXT
+    entity_type TEXT,
+    unique (entity_name, entity_type)
 );
 
 CREATE TABLE [relations](
@@ -15,12 +16,13 @@ CREATE TABLE [relations](
 );
 
 CREATE TABLE [relationships](
-    id INTEGER,
+    id INTEGER NOT NULL PRIMARY KEY,
     tablet_num TEXT,
     relation_type TEXT,
     subj TEXT,
     obj TEXT,
     providence TEXT,
     time_period TEXT,
-    dates_referenced TEXT
+    dates_referenced TEXT,
+    unique (tablet_num, relation_type)
 );

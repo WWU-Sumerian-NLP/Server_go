@@ -42,6 +42,8 @@ github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929041946-fc422c8f
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929041946-fc422c8fafd3/go.mod h1:gSGcgtwE1MuPprfGyDuk6Ku2epiR/NqnrZifUoi5Tzk=
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929054246-21f3d6ba025e h1:1zQmSKJXVgZVOUEiw3EbguS2odXEKEAexlEoWOvaTzU=
 github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929054246-21f3d6ba025e/go.mod h1:gSGcgtwE1MuPprfGyDuk6Ku2epiR/NqnrZifUoi5Tzk=
+github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929054804-94d8d605033e h1:9h70FdF9KWMDTi/XJO7vHD/F0jDZGaIaqvDGdwllqmc=
+github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20220929054804-94d8d605033e/go.mod h1:gSGcgtwE1MuPprfGyDuk6Ku2epiR/NqnrZifUoi5Tzk=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

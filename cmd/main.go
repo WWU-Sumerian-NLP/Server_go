@@ -140,7 +140,7 @@ func InsertEntities(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	f, err := os.OpenFile("./entity_input.tsv", os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("./entity_input.csv", os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Fatal()
 	}
@@ -155,13 +155,13 @@ func InsertEntities(w http.ResponseWriter, r *http.Request) {
 	io.Copy(&buf, file)
 	buf.Reset()
 
-	createdFile, err := os.Open("entity_input.tsv")
+	createdFile, err := os.Open("entity_input.csv")
 	if err != nil {
 		log.Fatal()
 	}
 
 	reader := csv.NewReader(createdFile)
-	reader.Comma = '\t'
+	// reader.Comma = '\t'
 	data, err := reader.ReadAll()
 	if err != nil {
 		fmt.Printf("data: %v\n", data)
