@@ -275,7 +275,8 @@ func InsertRelationships(w http.ResponseWriter, r *http.Request) {
 				DatesReferenced: row[6],
 			}
 			fmt.Printf("createdRelationship: %v\n", createdRelationship)
-			db.InsertRelationships(*createdRelationship)
+			_, err := db.InsertRelationships(*createdRelationship)
+			fmt.Printf("err: %v\n", err)
 		}
 	}
 	json.NewEncoder(w).Encode(contents)

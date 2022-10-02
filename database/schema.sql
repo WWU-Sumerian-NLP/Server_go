@@ -1,8 +1,8 @@
 CREATE TABLE [entities](
     id INTEGER NOT NULL PRIMARY KEY,
     entity_name TEXT,
-    entity_type TEXT,
-    unique (entity_name, entity_type)
+    entity_tag TEXT,
+    unique (entity_name, entity_tag)
 );
 
 CREATE TABLE [relations](

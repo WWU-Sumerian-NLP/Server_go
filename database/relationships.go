@@ -19,7 +19,7 @@ type Relationships struct {
 }
 
 func (i *InternalDB) InsertRelationships(relationships Relationships) (int, error) {
-	res, err := i.db.Exec("INSERT INTO relationships VALUES(NULL, ?, ?, ?, ?, ?);", relationships.TabletNum, relationships.RelationType,
+	res, err := i.db.Exec("INSERT INTO relationships VALUES(NULL, ?, ?, ?, ?, ?, ?, ?);", relationships.TabletNum, relationships.RelationType,
 		relationships.Subject, relationships.Object, relationships.Providence, relationships.TimePeriod, relationships.DatesReferenced)
 	if err != nil {
 		return 0, err
