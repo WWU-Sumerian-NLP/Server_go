@@ -7,7 +7,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/rs/cors v1.8.2
 	github.com/urr3-drehem-KG/Data_Pipeline_go/IE_Extractor v0.0.0-20220921003953-4c809f1ed4f7
-	github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20221002224100-6a842a7e0224
+	github.com/urr3-drehem-KG/gRPC_Server_go/database v0.0.0-20221002225810-0f90d457c681
 
 )
 
