@@ -1,34 +1,20 @@
 # Server_go
 
-This is a library to process Sumerian Tablets and perform NLP tasks
+This is our server that handles interactions between our dashboard, NLP libaries and other APIs.
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+Our server handles the relationship between the dashboard and our backend.  It imports our NLP libraries to use for each task and stores data in a relational database to handle the state of data between multiple services. </br>
+![server_endpoints](https://github.com/WWU-Sumerian-NLP/images/blob/master/server_endpoints.png) </br>
 
-## Getting Started
+This picture above shows the existing endpoints of our server. </br>
 
-### Dependencies
+Below, shows the function for when the run entity extraction endpoint is called. We import our CDLI_Extractor module from our NLP library to perform this task. </br>
+![running_libraries](https://github.com/WWU-Sumerian-NLP/images/blob/master/running_libraries_server.png) </br>
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
-
-### Installing
-
-* How/where to download your program
-* Any modifications needed to be made to files/folders
-
-### Executing program
-
-* How to run the program
-* Step-by-step bullets
-```
-code blocks for commands
-```
+Finally, this shows the schema for our relational database </br>
+![db_schema](https://github.com/WWU-Sumerian-NLP/images/blob/master/server_schema.png) </br>
 
 ## Authors
-
-Contributors names and contact info
-
 Hansel Guzman-Soto (https://www.linkedin.com/in/hansel-guzman-soto/)
 
