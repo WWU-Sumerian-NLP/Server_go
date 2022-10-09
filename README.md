@@ -1,4 +1,4 @@
-# gRPC_Server_go
+# Server_go
 
 This is a library to process Sumerian Tablets and perform NLP tasks
 
