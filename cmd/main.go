@@ -114,7 +114,7 @@ func RunRelationExtraction(w http.ResponseWriter, r *http.Request) {
 	}
 	// //Run Pipeline
 	path := "urr3_annotations.tsv"
-	destPath := "urr3_ie_annotations.tsv"
+	destPath := "urr3_ie_annotations_null.tsv"
 	cdliParser := IE_Extractor.NewCDLIParser(path)
 	RelationExtractorRB := IE_Extractor.NewRelationExtractorRB(cdliParser.Out)
 	for _, relation := range relations {
@@ -125,6 +125,37 @@ func RunRelationExtraction(w http.ResponseWriter, r *http.Request) {
 	}
 	dataWriter := IE_Extractor.NewDataWriter(destPath, RelationExtractorRB.Out)
 	dataWriter.WaitUntilDone()
+
+	//insert output of urr3_ie_annotations.tsv here
+	pathHere := "urr3_ie_annotations.tsv"
+
+	createdFile, err := os.Open(pathHere)
+	if err != nil {
+		log.Fatal()
+	}
+	reader := csv.NewReader(createdFile)
+	reader.Comma = '\t'
+	data, err := reader.ReadAll()
+	if err != nil {
+		fmt.Printf("data: %v\n", data)
+	}
+	for i, row := range data {
+		if i != 0 {
+			createdRelationship := &database.Relationships{
+				TabletNum:       row[0],
+				RelationType:    row[1],
+				Subject:         row[2],
+				Object:          row[3],
+				Providence:      row[4],
+				TimePeriod:      row[5],
+				DatesReferenced: row[6],
+			}
+			fmt.Printf("createdRelationship: %v\n", createdRelationship)
+			_, err := db.InsertRelationships(*createdRelationship)
+			fmt.Printf("err: %v\n", err)
+		}
+	}
+
 	json.NewEncoder(w).Encode(relations)
 }
 
@@ -266,13 +297,14 @@ func InsertRelationships(w http.ResponseWriter, r *http.Request) {
 	for i, row := range data {
 		if i != 0 {
 			createdRelationship := &database.Relationships{
-				TabletNum:       row[0],
-				RelationType:    row[1],
-				Subject:         row[2],
-				Object:          row[3],
-				Providence:      row[4],
-				TimePeriod:      row[5],
-				DatesReferenced: row[6],
+				TabletNum:    row[0],
+				RelationType: row[1],
+				Subject:      row[2],
+				Object:       row[3],
+				// for now
+				// Providence:      row[4],
+				// TimePeriod:      row[5],
+				// DatesReferenced: row[6],
 			}
 			fmt.Printf("createdRelationship: %v\n", createdRelationship)
 			_, err := db.InsertRelationships(*createdRelationship)

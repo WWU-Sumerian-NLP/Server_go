@@ -13,5 +13,6 @@ require (
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
-	github.com/urr3-drehem-KG/Data_Pipeline_go/CDLI_Extractor v0.0.0-20220929054029-72de4c4fd730 // indirect
+	github.com/urr3-drehem-KG/Data_Pipeline_go v0.0.0-20221008233458-7b57832d1ea3 // indirect
+	github.com/urr3-drehem-KG/Data_Pipeline_go/CDLI_Extractor v0.0.0-20221008233458-7b57832d1ea3 // indirect
 )
